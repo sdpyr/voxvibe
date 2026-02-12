@@ -1,5 +1,5 @@
 let activeSessionId = null;
-const sessionStartAt = Date.now();
+let sessionStartAt = null;
 const reactionButtons = [
   { kind: "critical", label: "Kritik", emoji: "🚩", intensity: 1 },
   { kind: "insight", label: "İçgörü", emoji: "🧠", intensity: 0.8 },
@@ -31,6 +31,12 @@ async function apiCall(path, method = "GET", payload = null) {
 function requireSessionId() {
   if (!activeSessionId) {
     throw new Error("Önce seans oluşturun.");
+  }
+}
+
+function requireSessionStart() {
+  if (sessionStartAt === null) {
+    throw new Error("Timestamp için önce seans oluşturun.");
   }
 }
 
@@ -67,24 +73,52 @@ async function createReaction(payload) {
   await refreshDetail();
 }
 
-function initializeReactionPanel() {
+function addReactionButton(reaction) {
   const panel = document.getElementById("reaction-panel");
-  reactionButtons.forEach((reaction) => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "reaction-btn";
-    button.textContent = `${reaction.emoji} ${reaction.label}`;
-    button.addEventListener("click", async () => {
-      try {
-        const timestampSec = (Date.now() - sessionStartAt) / 1000;
-        await createReaction({ ...reaction, timestamp_sec: Number(timestampSec.toFixed(1)) });
-      } catch (error) {
-        setStatus(error.message, true);
-      }
-    });
-    panel.appendChild(button);
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "reaction-btn";
+  button.textContent = `${reaction.emoji} ${reaction.label}`;
+  button.addEventListener("click", async () => {
+    try {
+      requireSessionStart();
+      const timestampSec = (Date.now() - sessionStartAt) / 1000;
+      await createReaction({ ...reaction, timestamp_sec: Number(timestampSec.toFixed(1)) });
+    } catch (error) {
+      setStatus(error.message, true);
+    }
   });
+  panel.appendChild(button);
 }
+
+function initializeReactionPanel() {
+  reactionButtons.forEach((reaction) => addReactionButton(reaction));
+}
+
+document.getElementById("reaction-config-form").addEventListener("submit", (event) => {
+  event.preventDefault();
+  const form = event.target;
+  const reaction = {
+    emoji: form.emoji.value.trim(),
+    label: form.label.value.trim(),
+    kind: form.kind.value.trim(),
+    intensity: Number(form.intensity.value),
+  };
+
+  if (!reaction.emoji || !reaction.label || !reaction.kind) {
+    setStatus("Yeni reaction için emoji/etiket/tip zorunlu.", true);
+    return;
+  }
+
+  reactionButtons.push(reaction);
+  addReactionButton(reaction);
+  form.reset();
+  form.emoji.value = "✨";
+  form.label.value = "Yeni İşaret";
+  form.kind.value = "custom";
+  form.intensity.value = "0.8";
+  setStatus(`${reaction.emoji} ${reaction.label} butonu eklendi.`);
+});
 
 document.getElementById("session-form").addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -97,6 +131,7 @@ document.getElementById("session-form").addEventListener("submit", async (event)
     };
     const created = await apiCall("/sessions", "POST", payload);
     activeSessionId = created.session.id;
+    sessionStartAt = Date.now();
     document.getElementById("session-id").textContent = activeSessionId;
     setStatus("Seans oluşturuldu.");
     await refreshDetail();

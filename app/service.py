@@ -79,6 +79,8 @@ class SentioTraceService:
             raise ValidationError("timestamp_sec must be >= 0")
         if mark.intensity < 0 or mark.intensity > 1:
             raise ValidationError("intensity must be between 0 and 1")
+        if not mark.kind.strip():
+            raise ValidationError("kind is required")
         if not mark.label.strip() or not mark.emoji.strip():
             raise ValidationError("label and emoji are required")
 

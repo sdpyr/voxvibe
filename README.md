@@ -10,7 +10,7 @@ SentioTrace için uygulama çekirdeği + dependency-free HTTP API prototipi.
 - Timestamp'e bağlı branch not ekleme
 - API endpoint'leri ile oturum akışını uçtan uca çalıştırma
 - Basit web arayüzü (`/`) ile manuel MVP demo
-- Reaction Panel: 🚩🧠⚠️❤️ canlı işaretleme ve timestamp bırakma
+- Reaction Panel: 🚩🧠⚠️❤️ canlı işaretleme, timestamp bırakma ve özel buton ekleme
 - Reaksiyon odaklı Smart-Summary (`/sessions/{id}/smart-summary`)
 
 ## API'yi çalıştırma

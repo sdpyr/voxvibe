@@ -115,6 +115,29 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(status, 400)
         self.assertIn("consent", payload["error"])
 
+    def test_custom_reaction_kind_accepted(self) -> None:
+        status, created = self._call(
+            "POST",
+            "/sessions",
+            {"therapist_id": "t-1", "patient_id": "p-1", "consent_captured": True},
+        )
+        self.assertEqual(status, 201)
+        session_id = created["session"]["id"]
+
+        status, payload = self._call(
+            "POST",
+            f"/sessions/{session_id}/reactions",
+            {
+                "timestamp_sec": 12,
+                "kind": "custom-focus",
+                "label": "Odak",
+                "emoji": "🎯",
+                "intensity": 0.6,
+            },
+        )
+        self.assertEqual(status, 201)
+        self.assertEqual(payload["reaction"]["kind"], "custom-focus")
+
 
 if __name__ == "__main__":
     unittest.main()

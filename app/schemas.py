@@ -8,7 +8,6 @@ from uuid import uuid4
 
 Speaker = Literal["Therapist", "Patient"]
 NoteType = Literal["risk", "homework", "breakthrough", "follow-up"]
-ReactionKind = Literal["critical", "insight", "inconsistency", "emotional"]
 
 
 @dataclass(slots=True)
@@ -51,7 +50,7 @@ class BranchNote:
 @dataclass(slots=True)
 class ReactionMark:
     timestamp_sec: float
-    kind: ReactionKind
+    kind: str
     label: str
     emoji: str
     intensity: float = 1.0
