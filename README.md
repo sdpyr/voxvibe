@@ -10,6 +10,8 @@ SentioTrace için uygulama çekirdeği + dependency-free HTTP API prototipi.
 - Timestamp'e bağlı branch not ekleme
 - API endpoint'leri ile oturum akışını uçtan uca çalıştırma
 - Basit web arayüzü (`/`) ile manuel MVP demo
+- Reaction Panel: 🚩🧠⚠️❤️ canlı işaretleme ve timestamp bırakma
+- Reaksiyon odaklı Smart-Summary (`/sessions/{id}/smart-summary`)
 
 ## API'yi çalıştırma
 
@@ -29,6 +31,8 @@ Tarayıcıdan aç: `http://127.0.0.1:8000/`
 - `POST /sessions/{session_id}/emotion`
 - `POST /sessions/{session_id}/notes`
 - `GET /sessions/{session_id}`
+- `POST /sessions/{session_id}/reactions`
+- `GET /sessions/{session_id}/smart-summary`
 
 ## Demo (otomatik akış)
 

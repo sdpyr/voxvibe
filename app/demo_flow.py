@@ -69,9 +69,24 @@ def run_demo() -> None:
         },
     )
 
+    _call(
+        "POST",
+        f"{base}/sessions/{session_id}/reactions",
+        {
+            "timestamp_sec": 24,
+            "kind": "critical",
+            "label": "Kritik",
+            "emoji": "🚩",
+            "intensity": 1,
+        },
+    )
+
     detail = _call("GET", f"{base}/sessions/{session_id}")
+    summary = _call("GET", f"{base}/sessions/{session_id}/smart-summary")
     print("Session detail:")
     print(json.dumps(detail, indent=2, ensure_ascii=False))
+    print("Smart summary:")
+    print(json.dumps(summary, indent=2, ensure_ascii=False))
 
 
 if __name__ == "__main__":

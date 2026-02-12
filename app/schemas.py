@@ -8,6 +8,7 @@ from uuid import uuid4
 
 Speaker = Literal["Therapist", "Patient"]
 NoteType = Literal["risk", "homework", "breakthrough", "follow-up"]
+ReactionKind = Literal["critical", "insight", "inconsistency", "emotional"]
 
 
 @dataclass(slots=True)
@@ -44,4 +45,14 @@ class BranchNote:
     note_type: NoteType
     text: str
     voice_note_url: Optional[str] = None
+    id: str = field(default_factory=lambda: str(uuid4()))
+
+
+@dataclass(slots=True)
+class ReactionMark:
+    timestamp_sec: float
+    kind: ReactionKind
+    label: str
+    emoji: str
+    intensity: float = 1.0
     id: str = field(default_factory=lambda: str(uuid4()))

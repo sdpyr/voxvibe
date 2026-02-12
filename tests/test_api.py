@@ -81,12 +81,30 @@ class ApiTests(unittest.TestCase):
         )
         self.assertEqual(status, 201)
 
+        status, _ = self._call(
+            "POST",
+            f"/sessions/{session_id}/reactions",
+            {
+                "timestamp_sec": 720,
+                "kind": "critical",
+                "label": "Kritik",
+                "emoji": "🚩",
+                "intensity": 1,
+            },
+        )
+        self.assertEqual(status, 201)
+
+        status, summary = self._call("GET", f"/sessions/{session_id}/smart-summary")
+        self.assertEqual(status, 200)
+        self.assertIn("Kritik", summary["smart_summary"]["headline"])
+
         status, detail = self._call("GET", f"/sessions/{session_id}")
         self.assertEqual(status, 200)
         self.assertEqual(detail["session"]["id"], session_id)
         self.assertEqual(len(detail["transcript"]), 1)
         self.assertEqual(len(detail["emotion_timeline"]), 1)
         self.assertEqual(len(detail["branch_notes"]), 1)
+        self.assertEqual(len(detail["reactions"]), 1)
 
     def test_consent_required(self) -> None:
         status, payload = self._call(

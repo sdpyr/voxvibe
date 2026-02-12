@@ -1,6 +1,6 @@
 import unittest
 
-from app.schemas import BranchNote, EmotionPoint, TranscriptChunk
+from app.schemas import BranchNote, EmotionPoint, ReactionMark, TranscriptChunk
 from app.service import NotFoundError, SentioTraceService, ValidationError
 
 
@@ -42,6 +42,21 @@ class SentioTraceServiceTests(unittest.TestCase):
     def test_unknown_session_raises_not_found(self) -> None:
         with self.assertRaises(NotFoundError):
             self.service.get_session_detail("missing")
+
+    def test_reaction_and_smart_summary(self) -> None:
+        session = self.service.create_session("t1", "p1", consent_captured=True)
+        self.service.add_transcript_chunk(
+            session.id,
+            TranscriptChunk(speaker="Patient", start_sec=720, end_sec=735, text="Burası kritik bir kırılma anı."),
+        )
+        self.service.add_reaction_mark(
+            session.id,
+            ReactionMark(timestamp_sec=720, kind="critical", label="Kritik", emoji="🚩", intensity=1),
+        )
+
+        summary = self.service.generate_smart_summary(session.id)
+        self.assertIn("Kritik", summary["headline"])
+        self.assertTrue(summary["highlights"])
 
 
 if __name__ == "__main__":

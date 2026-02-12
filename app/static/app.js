@@ -1,4 +1,11 @@
 let activeSessionId = null;
+const sessionStartAt = Date.now();
+const reactionButtons = [
+  { kind: "critical", label: "Kritik", emoji: "🚩", intensity: 1 },
+  { kind: "insight", label: "İçgörü", emoji: "🧠", intensity: 0.8 },
+  { kind: "inconsistency", label: "Tutarsızlık", emoji: "⚠️", intensity: 0.9 },
+  { kind: "emotional", label: "Duygusal", emoji: "❤️", intensity: 0.7 },
+];
 
 function setStatus(message, isError = false) {
   const statusEl = document.getElementById("status");
@@ -31,6 +38,52 @@ async function refreshDetail() {
   requireSessionId();
   const detail = await apiCall(`/sessions/${activeSessionId}`);
   document.getElementById("output").textContent = JSON.stringify(detail, null, 2);
+  renderBranchingReactionHints(detail.reactions || []);
+}
+
+function renderBranchingReactionHints(reactions) {
+  const noteForm = document.getElementById("note-form");
+  const panel = document.getElementById("reaction-panel");
+  panel.querySelectorAll(".branch-hint").forEach((item) => item.remove());
+
+  reactions.slice(-4).forEach((reaction) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "reaction-btn branch-hint";
+    button.textContent = `${reaction.emoji} ${reaction.label} @ ${reaction.timestamp_sec.toFixed(1)}s → nota dallan`;
+    button.addEventListener("click", () => {
+      noteForm.timestamp_sec.value = reaction.timestamp_sec;
+      noteForm.text.focus();
+      setStatus(`Branch note için ${reaction.timestamp_sec.toFixed(1)}s seçildi.`);
+    });
+    panel.appendChild(button);
+  });
+}
+
+async function createReaction(payload) {
+  requireSessionId();
+  await apiCall(`/sessions/${activeSessionId}/reactions`, "POST", payload);
+  setStatus(`${payload.emoji} ${payload.label} işaretlendi.`);
+  await refreshDetail();
+}
+
+function initializeReactionPanel() {
+  const panel = document.getElementById("reaction-panel");
+  reactionButtons.forEach((reaction) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "reaction-btn";
+    button.textContent = `${reaction.emoji} ${reaction.label}`;
+    button.addEventListener("click", async () => {
+      try {
+        const timestampSec = (Date.now() - sessionStartAt) / 1000;
+        await createReaction({ ...reaction, timestamp_sec: Number(timestampSec.toFixed(1)) });
+      } catch (error) {
+        setStatus(error.message, true);
+      }
+    });
+    panel.appendChild(button);
+  });
 }
 
 document.getElementById("session-form").addEventListener("submit", async (event) => {
@@ -118,3 +171,16 @@ document.getElementById("refresh-detail").addEventListener("click", async () => 
     setStatus(error.message, true);
   }
 });
+
+document.getElementById("smart-summary").addEventListener("click", async () => {
+  try {
+    requireSessionId();
+    const payload = await apiCall(`/sessions/${activeSessionId}/smart-summary`);
+    document.getElementById("summary-output").textContent = JSON.stringify(payload.smart_summary, null, 2);
+    setStatus("AI Smart-Summary üretildi.");
+  } catch (error) {
+    setStatus(error.message, true);
+  }
+});
+
+initializeReactionPanel();

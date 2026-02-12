@@ -9,7 +9,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
 
-from .schemas import BranchNote, EmotionPoint, TranscriptChunk
+from .schemas import BranchNote, EmotionPoint, ReactionMark, TranscriptChunk
 from .service import NotFoundError, SentioTraceService, ValidationError
 
 
@@ -78,6 +78,15 @@ class SentioTraceHandler(BaseHTTPRequestHandler):
             return
 
         if self.path.startswith("/sessions/"):
+            if self.path.endswith("/smart-summary"):
+                session_id = self.path.removeprefix("/sessions/").removesuffix("/smart-summary").rstrip("/")
+                try:
+                    summary = self.service.generate_smart_summary(session_id)
+                    self._send_json(HTTPStatus.OK, {"smart_summary": summary})
+                except NotFoundError as exc:
+                    self._send_json(HTTPStatus.NOT_FOUND, {"error": str(exc)})
+                return
+
             session_id = self.path.removeprefix("/sessions/")
             try:
                 detail = self.service.get_session_detail(session_id)
@@ -138,6 +147,19 @@ class SentioTraceHandler(BaseHTTPRequestHandler):
                 self._send_json(HTTPStatus.CREATED, {"branch_note": asdict(created)})
                 return
 
+            if self.path.startswith("/sessions/") and self.path.endswith("/reactions"):
+                session_id = self.path.removeprefix("/sessions/").removesuffix("/reactions").rstrip("/")
+                reaction = ReactionMark(
+                    timestamp_sec=float(payload["timestamp_sec"]),
+                    kind=payload["kind"],
+                    label=payload["label"],
+                    emoji=payload["emoji"],
+                    intensity=float(payload.get("intensity", 1.0)),
+                )
+                created = self.service.add_reaction_mark(session_id, reaction)
+                self._send_json(HTTPStatus.CREATED, {"reaction": asdict(created)})
+                return
+
             self._send_json(HTTPStatus.NOT_FOUND, {"error": "not found"})
         except KeyError as exc:
             self._send_json(HTTPStatus.BAD_REQUEST, {"error": f"missing field: {exc.args[0]}"})
@@ -152,7 +174,10 @@ class SentioTraceHandler(BaseHTTPRequestHandler):
 def run_server(host: str = "127.0.0.1", port: int = 8000) -> None:
     server = ThreadingHTTPServer((host, port), SentioTraceHandler)
     print(f"SentioTrace API running at http://{host}:{port}")
-    print("Endpoints: /health, /sessions, /sessions/{id}, /sessions/{id}/transcript, /sessions/{id}/emotion, /sessions/{id}/notes")
+    print(
+        "Endpoints: /health, /sessions, /sessions/{id}, /sessions/{id}/transcript, "
+        "/sessions/{id}/emotion, /sessions/{id}/notes, /sessions/{id}/reactions, /sessions/{id}/smart-summary"
+    )
     server.serve_forever()
 
 

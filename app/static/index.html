@@ -53,6 +53,12 @@
       </section>
 
       <section class="card">
+        <h2>Reaction Panel (Canlı Tepki)</h2>
+        <p class="muted">Seans sırasında butona basınca o an için timestamp işaretlenir.</p>
+        <div id="reaction-panel" class="reaction-panel"></div>
+      </section>
+
+      <section class="card">
         <h2>4) Branch Note</h2>
         <form id="note-form">
           <label>Timestamp (sec) <input name="timestamp_sec" type="number" step="0.1" value="15" required /></label>
@@ -73,9 +79,17 @@
       <section class="card">
         <div class="row">
           <h2>5) Session Detail</h2>
-          <button id="refresh-detail" type="button">Yenile</button>
+          <div class="inline-actions">
+            <button id="refresh-detail" type="button">Yenile</button>
+            <button id="smart-summary" type="button">AI Smart-Summary</button>
+          </div>
         </div>
         <pre id="output">Henüz veri yok.</pre>
+      </section>
+
+      <section class="card">
+        <h2>Smart Summary (Reaksiyon Odaklı)</h2>
+        <pre id="summary-output">Henüz üretilmedi.</pre>
       </section>
 
       <p id="status" class="status">Hazır.</p>

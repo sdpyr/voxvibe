@@ -89,6 +89,25 @@ button:hover {
   justify-content: space-between;
 }
 
+.inline-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.reaction-panel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.reaction-btn {
+  background: #111827;
+}
+
+.reaction-btn:hover {
+  background: #374151;
+}
+
 pre {
   background: #0f172a;
   color: #e2e8f0;
