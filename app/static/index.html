@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SentioTrace MVP</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <h1>SentioTrace · MVP Frontend</h1>
+      <p class="muted">Seans oluşturup transcript/emotion/note ekleyebileceğin temel arayüz.</p>
+
+      <section class="card">
+        <h2>1) Seans Oluştur</h2>
+        <form id="session-form">
+          <label>Terapist ID <input name="therapist_id" required value="t-101" /></label>
+          <label>Hasta ID <input name="patient_id" required value="p-501" /></label>
+          <label class="inline"><input type="checkbox" name="consent_captured" checked /> Consent alındı</label>
+          <button type="submit">Seans Aç</button>
+        </form>
+        <p><strong>Aktif Session ID:</strong> <span id="session-id">-</span></p>
+      </section>
+
+      <section class="grid-2">
+        <section class="card">
+          <h2>2) Transcript</h2>
+          <form id="transcript-form">
+            <label>Speaker
+              <select name="speaker">
+                <option>Patient</option>
+                <option>Therapist</option>
+              </select>
+            </label>
+            <label>Start (sec) <input name="start_sec" type="number" step="0.1" value="12" required /></label>
+            <label>End (sec) <input name="end_sec" type="number" step="0.1" value="20" required /></label>
+            <label>Text <textarea name="text" required>Bugün daha sakin hissediyorum.</textarea></label>
+            <button type="submit">Ekle</button>
+          </form>
+        </section>
+
+        <section class="card">
+          <h2>3) Emotion</h2>
+          <form id="emotion-form">
+            <label>Timestamp (sec) <input name="timestamp_sec" type="number" step="0.1" value="15" required /></label>
+            <label>Anxiety <input name="anxiety" type="number" step="0.01" min="0" max="1" value="0.3" required /></label>
+            <label>Sadness <input name="sadness" type="number" step="0.01" min="0" max="1" value="0.2" required /></label>
+            <label>Anger <input name="anger" type="number" step="0.01" min="0" max="1" value="0.1" required /></label>
+            <label>Neutral <input name="neutral" type="number" step="0.01" min="0" max="1" value="0.7" required /></label>
+            <button type="submit">Ekle</button>
+          </form>
+        </section>
+      </section>
+
+      <section class="card">
+        <h2>4) Branch Note</h2>
+        <form id="note-form">
+          <label>Timestamp (sec) <input name="timestamp_sec" type="number" step="0.1" value="15" required /></label>
+          <label>Type
+            <select name="note_type">
+              <option>risk</option>
+              <option>homework</option>
+              <option>breakthrough</option>
+              <option>follow-up</option>
+            </select>
+          </label>
+          <label>Text <textarea name="text" required>Ev ödevi: akşam nefes egzersizi.</textarea></label>
+          <label>Voice URL (opsiyonel) <input name="voice_note_url" /></label>
+          <button type="submit">Ekle</button>
+        </form>
+      </section>
+
+      <section class="card">
+        <div class="row">
+          <h2>5) Session Detail</h2>
+          <button id="refresh-detail" type="button">Yenile</button>
+        </div>
+        <pre id="output">Henüz veri yok.</pre>
+      </section>
+
+      <p id="status" class="status">Hazır.</p>
+    </main>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>

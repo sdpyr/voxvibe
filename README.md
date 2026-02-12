@@ -9,6 +9,7 @@ SentioTrace için uygulama çekirdeği + dependency-free HTTP API prototipi.
 - Duygu zaman çizelgesi noktası ekleme
 - Timestamp'e bağlı branch not ekleme
 - API endpoint'leri ile oturum akışını uçtan uca çalıştırma
+- Basit web arayüzü (`/`) ile manuel MVP demo
 
 ## API'yi çalıştırma
 
@@ -17,6 +18,8 @@ python -m app.api
 ```
 
 Varsayılan adres: `http://127.0.0.1:8000`
+
+Tarayıcıdan aç: `http://127.0.0.1:8000/`
 
 ### Endpoint'ler
 

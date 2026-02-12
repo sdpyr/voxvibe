@@ -1,15 +1,37 @@
 from __future__ import annotations
 
 import json
+import mimetypes
 from dataclasses import asdict
 from datetime import datetime
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
 from typing import Any
 
 from .schemas import BranchNote, EmotionPoint, TranscriptChunk
 from .service import NotFoundError, SentioTraceService, ValidationError
 
+
+
+
+STATIC_DIR = Path(__file__).with_name("static")
+
+
+def _read_static(path: str) -> tuple[bytes, str] | None:
+    if path == "/":
+        file_path = STATIC_DIR / "index.html"
+    elif path.startswith("/static/"):
+        file_path = STATIC_DIR / path.removeprefix("/static/")
+    else:
+        return None
+
+    resolved = file_path.resolve()
+    if not str(resolved).startswith(str(STATIC_DIR.resolve())) or not resolved.exists() or not resolved.is_file():
+        return None
+
+    content_type = mimetypes.guess_type(str(resolved))[0] or "application/octet-stream"
+    return resolved.read_bytes(), content_type
 
 def _to_jsonable(value: Any) -> Any:
     if isinstance(value, dict):
@@ -37,7 +59,20 @@ class SentioTraceHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _send_bytes(self, status: HTTPStatus, body: bytes, content_type: str) -> None:
+        self.send_response(status)
+        self.send_header("Content-Type", content_type)
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
     def do_GET(self) -> None:  # noqa: N802
+        static_file = _read_static(self.path)
+        if static_file is not None:
+            body, content_type = static_file
+            self._send_bytes(HTTPStatus.OK, body, content_type)
+            return
+
         if self.path == "/health":
             self._send_json(HTTPStatus.OK, {"status": "ok"})
             return

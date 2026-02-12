@@ -31,6 +31,21 @@ class ApiTests(unittest.TestCase):
             body = json.loads(exc.read().decode("utf-8"))
             return exc.code, body
 
+
+    def test_frontend_index_served(self) -> None:
+        req = request.Request(f"{self.base}/", method="GET")
+        with request.urlopen(req) as resp:
+            body = resp.read().decode("utf-8")
+            self.assertEqual(resp.status, 200)
+            self.assertIn("SentioTrace · MVP Frontend", body)
+
+    def test_frontend_static_asset_served(self) -> None:
+        req = request.Request(f"{self.base}/static/styles.css", method="GET")
+        with request.urlopen(req) as resp:
+            body = resp.read().decode("utf-8")
+            self.assertEqual(resp.status, 200)
+            self.assertIn(".container", body)
+
     def test_health(self) -> None:
         status, payload = self._call("GET", "/health")
         self.assertEqual(status, 200)
